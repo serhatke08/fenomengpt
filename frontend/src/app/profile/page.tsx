@@ -80,7 +80,7 @@ export default function ProfilePage() {
       } else {
         setError('Profil bilgileri yüklenirken hata oluştu');
       }
-    } catch (err) {
+    } catch {
       setError('Bağlantı hatası');
     } finally {
       setLoading(false);
@@ -125,7 +125,7 @@ export default function ProfilePage() {
       } else {
         alert(data.message || 'Güncelleme sırasında hata oluştu');
       }
-    } catch (err) {
+    } catch {
       alert('Bağlantı hatası');
     }
   };
@@ -169,7 +169,7 @@ export default function ProfilePage() {
       } else {
         alert(data.message || 'Şifre güncelleme sırasında hata oluştu');
       }
-    } catch (err) {
+    } catch {
       alert('Bağlantı hatası');
     }
   };
@@ -204,7 +204,7 @@ export default function ProfilePage() {
       } else {
         alert(data.message || 'Bakiye yükleme sırasında hata oluştu');
       }
-    } catch (err) {
+    } catch {
       alert('Bağlantı hatası');
     }
   };
