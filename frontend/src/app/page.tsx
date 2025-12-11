@@ -1,14 +1,11 @@
 'use client';
 
-import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/Button';
 import { ArrowRight, Zap, Shield, Clock } from 'lucide-react';
 import Navbar from '@/components/Navbar';
-import { useAuth } from '@/contexts/AuthContext';
 
 export default function HomePage() {
-  const { loading: authLoading } = useAuth();
 
   return (
     <div className="min-h-screen cyber-grid">

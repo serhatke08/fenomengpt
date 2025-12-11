@@ -32,7 +32,7 @@ export default function ProfilePage() {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [, setError] = useState('');
   const [showPasswordForm, setShowPasswordForm] = useState(false);
   const [showBalanceForm, setShowBalanceForm] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -99,8 +99,8 @@ export default function ProfilePage() {
       if (data.success) {
         setTransactions(data.data);
       }
-    } catch (err) {
-      console.error('Transactions fetch error:', err);
+    } catch {
+      // Silently fail for transactions
     }
   };
 

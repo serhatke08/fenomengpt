@@ -304,7 +304,7 @@ export default function ServicesPage() {
       const group = getServiceGroup(service.type, service.category);
       return group === selectedServiceGroup;
     });
-  }, [platformServices, selectedServiceGroup]);
+  }, [platformServices, selectedServiceGroup, selectedPlatform]);
 
   // Seçilen platform ve service group'a göre Category listesi
   const groupCategories = useMemo(() => {
@@ -324,7 +324,7 @@ export default function ServicesPage() {
     return groupServices.filter(service => {
       return service.category === selectedCategory;
     });
-  }, [groupServices, selectedCategory]);
+  }, [groupServices, selectedCategory, selectedPlatform, selectedServiceGroup]);
 
   // Platform seçildiğinde diğer seçimleri sıfırla
   const handlePlatformSelect = (platform: string) => {
