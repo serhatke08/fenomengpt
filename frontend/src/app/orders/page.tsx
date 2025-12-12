@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/Card';
+import { Card, CardContent } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Instagram, Music, Users, Heart, Eye, MessageCircle, Share2, Clock, CheckCircle, XCircle, AlertCircle, RefreshCw } from 'lucide-react';
 import Navbar from '@/components/Navbar';
@@ -109,7 +109,7 @@ export default function OrdersPage() {
       } else {
         setError('Siparişler yüklenirken hata oluştu');
       }
-    } catch (err) {
+    } catch {
       setError('Bağlantı hatası');
     } finally {
       setLoading(false);
@@ -135,7 +135,7 @@ export default function OrdersPage() {
       } else {
         alert(data.message || 'Sipariş iptal edilirken hata oluştu');
       }
-    } catch (err) {
+    } catch {
       alert('Bağlantı hatası');
     }
   };

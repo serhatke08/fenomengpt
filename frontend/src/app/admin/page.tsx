@@ -2,11 +2,11 @@
 
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/Card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Label } from '@/components/ui/Label';
-import { Users, Package, ShoppingCart, DollarSign, Plus, Edit, Trash2, Eye, Search, Filter, RefreshCw } from 'lucide-react';
+import { Users, Package, ShoppingCart, DollarSign, Plus, Edit, Trash2, Eye, RefreshCw } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import Link from 'next/link';
 
@@ -65,7 +65,7 @@ export default function AdminDashboard() {
   const [services, setServices] = useState<Service[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [, setError] = useState('');
 
   // Form states
   const [showServiceForm, setShowServiceForm] = useState(false);
@@ -127,7 +127,7 @@ export default function AdminDashboard() {
       if (data.success) {
         setUsers(data.data.users);
       }
-    } catch (err) {
+    } catch {
       setError('Kullanıcılar yüklenirken hata oluştu');
     } finally {
       setLoading(false);
@@ -147,7 +147,7 @@ export default function AdminDashboard() {
       if (data.success) {
         setServices(data.data.services);
       }
-    } catch (err) {
+    } catch {
       setError('Servisler yüklenirken hata oluştu');
     } finally {
       setLoading(false);
@@ -167,7 +167,7 @@ export default function AdminDashboard() {
       if (data.success) {
         setOrders(data.data.orders);
       }
-    } catch (err) {
+    } catch {
       setError('Siparişler yüklenirken hata oluştu');
     } finally {
       setLoading(false);
@@ -214,7 +214,7 @@ export default function AdminDashboard() {
       } else {
         alert(data.message || 'Hata oluştu');
       }
-    } catch (err) {
+    } catch {
       alert('Bağlantı hatası');
     }
   };
@@ -255,7 +255,7 @@ export default function AdminDashboard() {
       } else {
         alert(data.message || 'Hata oluştu');
       }
-    } catch (err) {
+    } catch {
       alert('Bağlantı hatası');
     }
   };
@@ -349,7 +349,7 @@ export default function AdminDashboard() {
             ].map(({ id, label, icon: Icon }) => (
               <button
                 key={id}
-                onClick={() => setActiveTab(id as any)}
+                onClick={() => setActiveTab(id as 'overview' | 'users' | 'services' | 'orders')}
                 className={`flex items-center space-x-2 px-4 py-2 rounded-md transition-colors ${
                   activeTab === id
                     ? 'bg-purple-500 text-white'

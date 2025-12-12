@@ -295,7 +295,7 @@ export default function ServicesPage() {
       groupSet.add(group);
     });
     return Array.from(groupSet).sort();
-  }, [platformServices]);
+  }, [platformServices, selectedPlatform]);
 
   // Seçilen platform ve service group'a göre servisler
   const groupServices = useMemo(() => {
