@@ -34,7 +34,12 @@ interface Service {
   name: string;
   platform: string;
   type: string;
+  description?: string;
   price: number;
+  minQuantity?: number;
+  maxQuantity?: number;
+  apiProvider?: string;
+  apiServiceId?: string;
   isActive: boolean;
   createdAt: string;
 }
