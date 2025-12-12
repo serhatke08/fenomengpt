@@ -95,6 +95,62 @@ const formatPrice = (price: number): string => {
   return price.toFixed(2);
 };
 
+// Platform belirleme
+const getPlatformFromCategory = (category: string | undefined): string => {
+  if (!category) return 'instagram';
+  const categoryLower = category.toLowerCase();
+  if (categoryLower.includes('instagram') || categoryLower.includes('ig')) {
+    return 'instagram';
+  } else if (categoryLower.includes('tiktok') || categoryLower.includes('tt')) {
+    return 'tiktok';
+  } else if (categoryLower.includes('youtube') || categoryLower.includes('yt')) {
+    return 'youtube';
+  } else if (categoryLower.includes('twitter') || categoryLower.includes('tw') || categoryLower.includes('x')) {
+    return 'twitter';
+  } else if (categoryLower.includes('facebook') || categoryLower.includes('fb')) {
+    return 'facebook';
+  } else if (categoryLower.includes('telegram')) {
+    return 'telegram';
+  } else if (categoryLower.includes('spotify')) {
+    return 'spotify';
+  } else if (categoryLower.includes('twitch')) {
+    return 'twitch';
+  }
+  return 'instagram';
+};
+
+// Service Group belirleme
+const getServiceGroup = (type: string | undefined, category: string | undefined): string => {
+  if (!type && !category) return 'other';
+  const typeLower = (type || '').toLowerCase();
+  const categoryLower = (category || '').toLowerCase();
+  
+  if (typeLower.includes('follower') || categoryLower.includes('follower')) {
+    return 'followers';
+  } else if (typeLower.includes('like') || categoryLower.includes('like')) {
+    return 'likes';
+  } else if (typeLower.includes('view') || categoryLower.includes('view')) {
+    return 'views';
+  } else if (typeLower.includes('comment') || categoryLower.includes('comment')) {
+    return 'comments';
+  } else if (typeLower.includes('share') || categoryLower.includes('share')) {
+    return 'shares';
+  } else if (typeLower.includes('subscriber') || categoryLower.includes('subscriber')) {
+    return 'subscribers';
+  } else if (typeLower.includes('reaction') || categoryLower.includes('reaction')) {
+    return 'reactions';
+  } else if (typeLower.includes('member') || categoryLower.includes('member')) {
+    return 'members';
+  } else if (typeLower.includes('play') || categoryLower.includes('play')) {
+    return 'plays';
+  } else if (typeLower.includes('stream') || categoryLower.includes('stream')) {
+    return 'streams';
+  } else if (typeLower.includes('vote') || typeLower.includes('poll')) {
+    return 'votes';
+  }
+  return 'other';
+};
+
 export default function ServicesPage() {
   const [services, setServices] = useState<Service[]>([]);
   const [loading, setLoading] = useState(true);
@@ -195,61 +251,6 @@ export default function ServicesPage() {
     return translated;
   };
 
-  // Platform belirleme
-  const getPlatformFromCategory = (category: string | undefined): string => {
-    if (!category) return 'instagram';
-    const categoryLower = category.toLowerCase();
-    if (categoryLower.includes('instagram') || categoryLower.includes('ig')) {
-      return 'instagram';
-    } else if (categoryLower.includes('tiktok') || categoryLower.includes('tt')) {
-      return 'tiktok';
-    } else if (categoryLower.includes('youtube') || categoryLower.includes('yt')) {
-      return 'youtube';
-    } else if (categoryLower.includes('twitter') || categoryLower.includes('tw') || categoryLower.includes('x')) {
-      return 'twitter';
-    } else if (categoryLower.includes('facebook') || categoryLower.includes('fb')) {
-      return 'facebook';
-    } else if (categoryLower.includes('telegram')) {
-      return 'telegram';
-    } else if (categoryLower.includes('spotify')) {
-      return 'spotify';
-    } else if (categoryLower.includes('twitch')) {
-      return 'twitch';
-    }
-    return 'instagram';
-  };
-
-  // Service Group belirleme
-  const getServiceGroup = (type: string | undefined, category: string | undefined): string => {
-    if (!type && !category) return 'other';
-    const typeLower = (type || '').toLowerCase();
-    const categoryLower = (category || '').toLowerCase();
-    
-    if (typeLower.includes('follower') || categoryLower.includes('follower')) {
-      return 'followers';
-    } else if (typeLower.includes('like') || categoryLower.includes('like')) {
-      return 'likes';
-    } else if (typeLower.includes('view') || categoryLower.includes('view')) {
-      return 'views';
-    } else if (typeLower.includes('comment') || categoryLower.includes('comment')) {
-      return 'comments';
-    } else if (typeLower.includes('share') || categoryLower.includes('share')) {
-      return 'shares';
-    } else if (typeLower.includes('subscriber') || categoryLower.includes('subscriber')) {
-      return 'subscribers';
-    } else if (typeLower.includes('reaction') || categoryLower.includes('reaction')) {
-      return 'reactions';
-    } else if (typeLower.includes('member') || categoryLower.includes('member')) {
-      return 'members';
-    } else if (typeLower.includes('play') || categoryLower.includes('play')) {
-      return 'plays';
-    } else if (typeLower.includes('stream') || categoryLower.includes('stream')) {
-      return 'streams';
-    } else if (typeLower.includes('vote') || typeLower.includes('poll')) {
-      return 'votes';
-    }
-    return 'other';
-  };
 
   // Service Group isimleri
   const serviceGroupNames: { [key: string]: string } = {
