@@ -17,6 +17,10 @@ dotenv.config();
 
 const app = express();
 
+// Trust proxy - required when behind a reverse proxy (e.g., Render, Vercel, nginx)
+// This allows express-rate-limit to correctly identify client IPs from X-Forwarded-For headers
+app.set('trust proxy', true);
+
 // Security middleware
 app.use(helmet());
 
