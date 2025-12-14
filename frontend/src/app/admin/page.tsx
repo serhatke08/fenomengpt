@@ -232,8 +232,8 @@ export default function AdminDashboard() {
       type: service.type,
       description: service.description || '',
       price: service.price,
-      minQuantity: service.minQuantity,
-      maxQuantity: service.maxQuantity,
+      minQuantity: service.minQuantity || 0,
+      maxQuantity: service.maxQuantity || 0,
       apiProvider: service.apiProvider || '',
       apiServiceId: service.apiServiceId || '',
       isActive: service.isActive
@@ -524,7 +524,7 @@ export default function AdminDashboard() {
                             {service.platform} • {service.type} • ${service.price.toFixed(2)}
                           </p>
                           <p className="text-purple-400 text-xs">
-                            Miktar: {service.minQuantity} - {service.maxQuantity.toLocaleString()} • 
+                            Miktar: {service.minQuantity || 0} - {(service.maxQuantity || 0).toLocaleString()} • 
                             Durum: {service.isActive ? 'Aktif' : 'Pasif'}
                           </p>
                         </div>
