@@ -32,7 +32,6 @@ export default function ProfilePage() {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
-  const [, setError] = useState('');
   const [showPasswordForm, setShowPasswordForm] = useState(false);
   const [showBalanceForm, setShowBalanceForm] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -78,10 +77,10 @@ export default function ProfilePage() {
           email: data.data.email
         });
       } else {
-        setError('Profil bilgileri yüklenirken hata oluştu');
+        alert('Profil bilgileri yüklenirken hata oluştu');
       }
     } catch {
-      setError('Bağlantı hatası');
+      alert('Bağlantı hatası');
     } finally {
       setLoading(false);
     }
