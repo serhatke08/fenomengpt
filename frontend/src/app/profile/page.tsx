@@ -79,8 +79,9 @@ export default function ProfilePage() {
       } else {
         alert('Profil bilgileri yüklenirken hata oluştu');
       }
-    } catch {
-      alert('Bağlantı hatası');
+    } catch (err) {
+      console.error('Profil yükleme hatası:', err);
+      alert('Profil bilgileri yüklenirken bir hata oluştu. Lütfen tekrar deneyin.');
     } finally {
       setLoading(false);
     }
@@ -98,8 +99,9 @@ export default function ProfilePage() {
       if (data.success) {
         setTransactions(data.data);
       }
-    } catch {
-      // Silently fail for transactions
+    } catch (err) {
+      console.error('İşlem geçmişi yükleme hatası:', err);
+      // Transactions için sessizce başarısız ol, ana işlevselliği bozma
     }
   };
 
@@ -124,8 +126,9 @@ export default function ProfilePage() {
       } else {
         alert(data.message || 'Güncelleme sırasında hata oluştu');
       }
-    } catch {
-      alert('Bağlantı hatası');
+    } catch (err) {
+      console.error('Profil güncelleme hatası:', err);
+      alert('Profil güncellenirken bir hata oluştu. Lütfen tekrar deneyin.');
     }
   };
 
@@ -168,8 +171,9 @@ export default function ProfilePage() {
       } else {
         alert(data.message || 'Şifre güncelleme sırasında hata oluştu');
       }
-    } catch {
-      alert('Bağlantı hatası');
+    } catch (err) {
+      console.error('Şifre güncelleme hatası:', err);
+      alert('Şifre güncellenirken bir hata oluştu. Lütfen tekrar deneyin.');
     }
   };
 
@@ -203,8 +207,9 @@ export default function ProfilePage() {
       } else {
         alert(data.message || 'Bakiye yükleme sırasında hata oluştu');
       }
-    } catch {
-      alert('Bağlantı hatası');
+    } catch (err) {
+      console.error('Bakiye yükleme hatası:', err);
+      alert('Bakiye yüklenirken bir hata oluştu. Lütfen tekrar deneyin.');
     }
   };
 

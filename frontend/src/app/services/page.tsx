@@ -178,7 +178,8 @@ export default function ServicesPage() {
       const data = await response.json();
       setServices(data.data || []);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Bir hata oluştu');
+      console.error('Servisler yükleme hatası:', err);
+      setError(err instanceof Error ? err.message : 'Servisler yüklenirken bir hata oluştu');
     } finally {
       setLoading(false);
     }

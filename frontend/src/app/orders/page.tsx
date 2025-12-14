@@ -109,8 +109,9 @@ export default function OrdersPage() {
       } else {
         setError('Siparişler yüklenirken hata oluştu');
       }
-    } catch {
-      setError('Bağlantı hatası');
+    } catch (err) {
+      console.error('Siparişler yükleme hatası:', err);
+      setError('Siparişler yüklenirken bir hata oluştu. Lütfen tekrar deneyin.');
     } finally {
       setLoading(false);
     }
@@ -135,8 +136,9 @@ export default function OrdersPage() {
       } else {
         alert(data.message || 'Sipariş iptal edilirken hata oluştu');
       }
-    } catch {
-      alert('Bağlantı hatası');
+    } catch (err) {
+      console.error('Sipariş iptal hatası:', err);
+      alert('Sipariş iptal edilirken bir hata oluştu. Lütfen tekrar deneyin.');
     }
   };
 

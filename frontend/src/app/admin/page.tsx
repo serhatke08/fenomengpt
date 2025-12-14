@@ -132,8 +132,9 @@ export default function AdminDashboard() {
       if (data.success) {
         setUsers(data.data.users);
       }
-    } catch {
-      setError('Kullanıcılar yüklenirken hata oluştu');
+    } catch (err) {
+      console.error('Kullanıcılar yükleme hatası:', err);
+      setError('Kullanıcılar yüklenirken bir hata oluştu');
     } finally {
       setLoading(false);
     }
@@ -152,8 +153,9 @@ export default function AdminDashboard() {
       if (data.success) {
         setServices(data.data.services);
       }
-    } catch {
-      setError('Servisler yüklenirken hata oluştu');
+    } catch (err) {
+      console.error('Servisler yükleme hatası:', err);
+      setError('Servisler yüklenirken bir hata oluştu');
     } finally {
       setLoading(false);
     }
@@ -172,8 +174,9 @@ export default function AdminDashboard() {
       if (data.success) {
         setOrders(data.data.orders);
       }
-    } catch {
-      setError('Siparişler yüklenirken hata oluştu');
+    } catch (err) {
+      console.error('Siparişler yükleme hatası:', err);
+      setError('Siparişler yüklenirken bir hata oluştu');
     } finally {
       setLoading(false);
     }
@@ -219,8 +222,9 @@ export default function AdminDashboard() {
       } else {
         alert(data.message || 'Hata oluştu');
       }
-    } catch {
-      alert('Bağlantı hatası');
+    } catch (err) {
+      console.error('Servis oluşturma hatası:', err);
+      alert('Servis oluşturulurken bir hata oluştu. Lütfen tekrar deneyin.');
     }
   };
 
@@ -260,8 +264,9 @@ export default function AdminDashboard() {
       } else {
         alert(data.message || 'Hata oluştu');
       }
-    } catch {
-      alert('Bağlantı hatası');
+    } catch (err) {
+      console.error('Servis silme hatası:', err);
+      alert('Servis silinirken bir hata oluştu. Lütfen tekrar deneyin.');
     }
   };
 
