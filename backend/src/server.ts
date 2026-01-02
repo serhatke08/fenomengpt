@@ -1,7 +1,9 @@
 import app from './app';
 import dotenv from 'dotenv';
+import path from 'path';
 
-dotenv.config();
+// .env dosyasını backend klasöründen yükle
+dotenv.config({ path: path.resolve(__dirname, '../../.env') });
 
 const PORT = process.env.PORT || 5000;
 

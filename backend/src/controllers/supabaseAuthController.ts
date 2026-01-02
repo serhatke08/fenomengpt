@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { validationResult } from 'express-validator';
-import supabaseAdmin from '../config/supabase';
+import supabaseAdmin, { supabaseAuth } from '../config/supabase';
 import { User } from '../models/supabase/User';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
@@ -126,25 +126,44 @@ export const login = async (req: Request, res: Response): Promise<void> => {
 
     const { email, password } = req.body;
 
-    // Supabase Auth ile giriş yap
-    const { data: authData, error: authError } = await supabaseAdmin.auth.signInWithPassword({
-      email,
-      password
-    });
-
-    if (authError || !authData.user) {
-      res.status(401).json({
+    if (!email || !password) {
+      res.status(400).json({
         success: false,
-        message: authError?.message || 'Invalid email or password'
+        message: 'Email and password are required'
       });
       return;
     }
 
-    // Veritabanından kullanıcıyı bul
-    let user = await User.findById(authData.user.id);
+    // Supabase Auth ile giriş yap (anon key ile)
+    try {
+      const { data: authData, error: authError } = await supabaseAuth.auth.signInWithPassword({
+        email,
+        password
+      });
 
-    // Eğer veritabanında yoksa oluştur
-    if (!user) {
+      if (authError) {
+        console.error('Supabase Auth error:', authError);
+        res.status(401).json({
+          success: false,
+          message: authError.message || 'Invalid email or password',
+          error: process.env.NODE_ENV === 'development' ? authError.message : undefined
+        });
+        return;
+      }
+
+      if (!authData || !authData.user) {
+        res.status(401).json({
+          success: false,
+          message: 'Invalid email or password'
+        });
+        return;
+      }
+
+      // Veritabanından kullanıcıyı bul
+      let user = await User.findById(authData.user.id);
+
+      // Eğer veritabanında yoksa oluştur
+      if (!user) {
       try {
         const username = authData.user.user_metadata?.username || 
                         email.split('@')[0] || 
@@ -177,38 +196,42 @@ export const login = async (req: Request, res: Response): Promise<void> => {
         });
         return;
       }
-    }
-
-    // Hesap aktif kontrolü
-    if (!user.is_active) {
-      res.status(401).json({
-        success: false,
-        message: 'Account is deactivated'
-      });
-      return;
-    }
-
-    // JWT token oluştur
-    const token = jwt.sign(
-      { userId: user.id, email: user.email, role: user.role },
-      process.env.JWT_SECRET || 'fallback_secret',
-      { expiresIn: '7d' }
-    );
-
-    res.status(200).json({
-      success: true,
-      message: 'Login successful',
-      data: {
-        user: {
-          id: user.id,
-          username: user.username,
-          email: user.email,
-          balance: user.balance,
-          role: user.role
-        },
-        token
       }
-    });
+
+      // Hesap aktif kontrolü
+      if (!user.is_active) {
+        res.status(401).json({
+          success: false,
+          message: 'Account is deactivated'
+        });
+        return;
+      }
+
+      // JWT token oluştur
+      const token = jwt.sign(
+        { userId: user.id, email: user.email, role: user.role },
+        process.env.JWT_SECRET || 'fallback_secret',
+        { expiresIn: '7d' }
+      );
+
+      res.status(200).json({
+        success: true,
+        message: 'Login successful',
+        data: {
+          user: {
+            id: user.id,
+            username: user.username,
+            email: user.email,
+            balance: user.balance,
+            role: user.role
+          },
+          token
+        }
+      });
+    } catch (authError: any) {
+      console.error('Auth error in login:', authError);
+      throw authError;
+    }
   } catch (error: any) {
     console.error('Login error:', error);
     res.status(500).json({
@@ -345,7 +368,7 @@ export const changePassword = async (req: Request, res: Response): Promise<void>
     }
 
     // Mevcut şifre kontrolü
-    const { error: signInError } = await supabaseAdmin.auth.signInWithPassword({
+    const { error: signInError } = await supabaseAuth.auth.signInWithPassword({
       email: user.email,
       password: currentPassword
     });

@@ -4,16 +4,17 @@ import helmet from 'helmet';
 import morgan from 'morgan';
 import rateLimit from 'express-rate-limit';
 import dotenv from 'dotenv';
+import path from 'path';
 
 // Import routes
 import authRoutes from './routes/firebaseAuth';
 import orderRoutes from './routes/firebaseOrders';
 import adminRoutes from './routes/firebaseAdmin';
-import followizRoutes from './routes/followiz';
+import turktakipcimRoutes from './routes/turktakipcim';
 import webhookRoutes from './routes/webhooks';
 
-// Load environment variables
-dotenv.config();
+// Load environment variables - .env dosyasını backend klasöründen yükle
+dotenv.config({ path: path.resolve(__dirname, '../.env') });
 
 const app = express();
 
@@ -38,8 +39,12 @@ app.use(cors({
     process.env.FRONTEND_URL || 'http://localhost:3000',
     'http://localhost:3000',
     'http://localhost:3001',
+    'http://localhost:3002',
+    'http://localhost:3003',
     'http://127.0.0.1:3000',
     'http://127.0.0.1:3001',
+    'http://127.0.0.1:3002',
+    'http://127.0.0.1:3003',
     'https://www.fenomengpt.com',
     'https://fenomengpt.com'
   ],
@@ -58,10 +63,9 @@ app.use('/api/auth', authRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/admin', adminRoutes);
 
-// Followiz API Routes - Servisler direkt Followiz'den geliyor
-app.use('/api/services', followizRoutes);
-app.use('/api/followiz', followizRoutes);
-
+// TurkTakipcim API Routes - Servisler direkt TurkTakipcim'den geliyor
+app.use('/api/services', turktakipcimRoutes);
+app.use('/api/turktakipcim', turktakipcimRoutes);
 
 // Webhook Routes
 app.use('/api/webhooks', webhookRoutes);
@@ -74,6 +78,27 @@ app.get('/api/health', (req, res) => {
     uptime: process.uptime()
   });
 });
+
+// Supabase test endpoint (development only)
+if (process.env.NODE_ENV === 'development') {
+  app.get('/api/test/supabase', async (req, res) => {
+    try {
+      const { supabaseAuth } = require('./config/supabase');
+      const testResult = await supabaseAuth.auth.getSession();
+      res.json({
+        success: true,
+        message: 'Supabase client is working',
+        hasSession: !!testResult.data.session,
+        anonKey: process.env.SUPABASE_ANON_KEY ? 'SET' : 'NOT SET'
+      });
+    } catch (error: any) {
+      res.status(500).json({
+        success: false,
+        error: error.message
+      });
+    }
+  });
+}
 
 // Error handling middleware
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {

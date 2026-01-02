@@ -14,36 +14,45 @@ export interface IUser {
 
 export class User {
   static async create(userData: Omit<IUser, 'id' | 'created_at' | 'updated_at'> & { id?: string }): Promise<IUser> {
-    const now = new Date().toISOString();
-    const userDataWithDefaults = {
-      ...userData,
-      balance: userData.balance || 0,
-      role: userData.role || 'user',
-      is_active: userData.is_active !== undefined ? userData.is_active : true,
-    };
-    
-    const user: Partial<IUser> = {
-      ...userDataWithDefaults,
-      created_at: now,
-      updated_at: now,
-    };
+    try {
+      const now = new Date().toISOString();
+      const userDataWithDefaults = {
+        ...userData,
+        balance: userData.balance || 0,
+        role: userData.role || 'user',
+        is_active: userData.is_active !== undefined ? userData.is_active : true,
+      };
+      
+      const user: Partial<IUser> = {
+        ...userDataWithDefaults,
+        created_at: now,
+        updated_at: now,
+      };
 
-    // Eğer id verilmişse, onu kullan
-    if (userData.id) {
-      user.id = userData.id;
+      // Eğer id verilmişse, onu kullan
+      if (userData.id) {
+        user.id = userData.id;
+      }
+
+      const { data, error } = await supabaseAdmin
+        .from('users')
+        .insert(user)
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Supabase error in create:', error);
+        throw new Error(`Failed to create user: ${error.message}`);
+      }
+
+      return data as IUser;
+    } catch (error: any) {
+      if (error.message && error.message.includes('fetch failed')) {
+        console.error('Network error in create:', error);
+        throw new Error('Database connection failed. Please check your Supabase configuration.');
+      }
+      throw error;
     }
-
-    const { data, error } = await supabaseAdmin
-      .from('users')
-      .insert(user)
-      .select()
-      .single();
-
-    if (error) {
-      throw new Error(`Failed to create user: ${error.message}`);
-    }
-
-    return data as IUser;
   }
 
   static async findById(id: string): Promise<IUser | null> {
@@ -64,39 +73,57 @@ export class User {
   }
 
   static async findByEmail(email: string): Promise<IUser | null> {
-    const { data, error } = await supabaseAdmin
-      .from('users')
-      .select('*')
-      .eq('email', email)
-      .limit(1)
-      .single();
+    try {
+      const { data, error } = await supabaseAdmin
+        .from('users')
+        .select('*')
+        .eq('email', email)
+        .limit(1)
+        .single();
 
-    if (error) {
-      if (error.code === 'PGRST116') {
-        return null; // Not found
+      if (error) {
+        if (error.code === 'PGRST116') {
+          return null; // Not found
+        }
+        console.error('Supabase error in findByEmail:', error);
+        throw new Error(`Failed to find user by email: ${error.message}`);
       }
-      throw new Error(`Failed to find user by email: ${error.message}`);
-    }
 
-    return data as IUser;
+      return data as IUser;
+    } catch (error: any) {
+      if (error.message && error.message.includes('fetch failed')) {
+        console.error('Network error in findByEmail:', error);
+        throw new Error('Database connection failed. Please check your Supabase configuration.');
+      }
+      throw error;
+    }
   }
 
   static async findByUsername(username: string): Promise<IUser | null> {
-    const { data, error } = await supabaseAdmin
-      .from('users')
-      .select('*')
-      .eq('username', username)
-      .limit(1)
-      .single();
+    try {
+      const { data, error } = await supabaseAdmin
+        .from('users')
+        .select('*')
+        .eq('username', username)
+        .limit(1)
+        .single();
 
-    if (error) {
-      if (error.code === 'PGRST116') {
-        return null; // Not found
+      if (error) {
+        if (error.code === 'PGRST116') {
+          return null; // Not found
+        }
+        console.error('Supabase error in findByUsername:', error);
+        throw new Error(`Failed to find user by username: ${error.message}`);
       }
-      throw new Error(`Failed to find user by username: ${error.message}`);
-    }
 
-    return data as IUser;
+      return data as IUser;
+    } catch (error: any) {
+      if (error.message && error.message.includes('fetch failed')) {
+        console.error('Network error in findByUsername:', error);
+        throw new Error('Database connection failed. Please check your Supabase configuration.');
+      }
+      throw error;
+    }
   }
 
   static async update(id: string, data: Partial<IUser>): Promise<IUser | null> {

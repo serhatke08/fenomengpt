@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import { validationResult } from 'express-validator';
 import { Order } from '../models/supabase/Order';
 import { User } from '../models/supabase/User';
-import FollowizService from '../services/followizService';
+import TurkTakipcimService from '../services/turktakipcimService';
 
 interface AuthRequest extends Request {
   userId?: string;
@@ -22,11 +22,11 @@ export const createOrder = async (req: AuthRequest, res: Response): Promise<void
 
     const { serviceId, link, quantity } = req.body;
 
-    // Followiz API'den servis bilgilerini çek
-    const followizService = new FollowizService();
+    // TurkTakipcim API'den servis bilgilerini çek
+    const turktakipcimService = new TurkTakipcimService();
     let serviceInfo;
     try {
-      const services = await followizService.getServices();
+      const services = await turktakipcimService.getServices();
       serviceInfo = services.find(s => s.service === parseInt(serviceId));
       
       if (!serviceInfo) {
@@ -44,7 +44,7 @@ export const createOrder = async (req: AuthRequest, res: Response): Promise<void
       return;
     }
 
-    // Miktar kontrolü (Followiz'de min ve max string olarak geliyor)
+    // Miktar kontrolü
     const minQuantity = parseInt(serviceInfo.min);
     const maxQuantity = parseInt(serviceInfo.max);
     
@@ -56,9 +56,10 @@ export const createOrder = async (req: AuthRequest, res: Response): Promise<void
       return;
     }
 
-    // Toplam fiyat hesapla (rate string olarak geliyor, 1000 birim için)
+    // Toplam fiyat hesapla (rate string olarak geliyor, 1000 birim için, %52 zam uygulanıyor)
     const rate = parseFloat(serviceInfo.rate);
-    const totalPrice = (rate * quantity) / 1000;
+    const increasedRate = rate * 1.52; // %52 zam
+    const totalPrice = (increasedRate * quantity) / 1000;
 
     // Kullanıcı kontrolü ve bakiye kontrolü
     const user = await User.findById(req.userId!);
@@ -78,22 +79,22 @@ export const createOrder = async (req: AuthRequest, res: Response): Promise<void
       return;
     }
 
-    // Followiz API ile sipariş oluştur
+    // TurkTakipcim API ile sipariş oluştur
     let externalOrderId: string | null = null;
     let orderStatus = 'pending';
 
     try {
-      const externalOrder = await followizService.createOrder(
+      const externalOrder = await turktakipcimService.createOrder(
         serviceInfo.service,
         link,
         quantity
       );
       
       externalOrderId = externalOrder.order.toString();
-      orderStatus = 'in_progress'; // Followiz'de sipariş oluşturulduğunda otomatik olarak işleme alınır
+      orderStatus = 'in_progress'; // TurkTakipcim'de sipariş oluşturulduğunda otomatik olarak işleme alınır
     } catch (error) {
-      console.error('Followiz API error:', error);
-      // Followiz API hatası durumunda siparişi pending olarak oluştur
+      console.error('TurkTakipcim API error:', error);
+      // TurkTakipcim API hatası durumunda siparişi pending olarak oluştur
       orderStatus = 'pending';
     }
 
@@ -136,11 +137,11 @@ export const getUserOrders = async (req: AuthRequest, res: Response): Promise<vo
 
     const { orders, total } = await Order.findByUserId(req.userId!, limit, offset);
 
-    // Servis bilgilerini Followiz API'den çek
-    const followizService = new FollowizService();
-    let allServices: Awaited<ReturnType<typeof followizService.getServices>> = [];
+    // Servis bilgilerini TurkTakipcim API'den çek
+    const turktakipcimService = new TurkTakipcimService();
+    let allServices: Awaited<ReturnType<typeof turktakipcimService.getServices>> = [];
     try {
-      allServices = await followizService.getServices();
+      allServices = await turktakipcimService.getServices();
     } catch (error) {
       console.error('Failed to fetch services:', error);
     }
@@ -204,11 +205,11 @@ export const getOrderById = async (req: AuthRequest, res: Response): Promise<voi
       return;
     }
 
-    // Servis bilgisini Followiz API'den çek
-    const followizService = new FollowizService();
+    // Servis bilgisini TurkTakipcim API'den çek
+    const turktakipcimService = new TurkTakipcimService();
     let service = null;
     try {
-      const services = await followizService.getServices();
+      const services = await turktakipcimService.getServices();
       service = services.find(s => s.service === parseInt(order.service_id));
     } catch (error) {
       console.error('Failed to fetch service:', error);
@@ -266,13 +267,13 @@ export const cancelOrder = async (req: AuthRequest, res: Response): Promise<void
       return;
     }
 
-    // Followiz API'den siparişi iptal et (eğer external order ID varsa)
+    // TurkTakipcim API'den siparişi iptal et (eğer external order ID varsa)
     if (order.api_order_id) {
       try {
-        const followizService = new FollowizService();
-        await followizService.cancelOrder([parseInt(order.api_order_id)]);
+        const turktakipcimService = new TurkTakipcimService();
+        await turktakipcimService.cancelOrder([parseInt(order.api_order_id)]);
       } catch (error) {
-        console.error('Followiz cancel order error:', error);
+        console.error('TurkTakipcim cancel order error:', error);
         // API hatası olsa bile yerel siparişi iptal et
       }
     }
@@ -312,9 +313,9 @@ export const updateOrderStatus = async (req: Request, res: Response): Promise<vo
       return;
     }
 
-    // Followiz API'den sipariş durumunu kontrol et
-    const followizService = new FollowizService();
-    const externalOrder = await followizService.getOrderStatus(parseInt(order.api_order_id));
+    // TurkTakipcim API'den sipariş durumunu kontrol et
+    const turktakipcimService = new TurkTakipcimService();
+    const externalOrder = await turktakipcimService.getOrderStatus(parseInt(order.api_order_id));
 
     // Durumu güncelle
     let newStatus = order.status;
@@ -328,15 +329,12 @@ export const updateOrderStatus = async (req: Request, res: Response): Promise<vo
         completionDate = new Date().toISOString();
         break;
       case 'In progress':
+      case 'Partial':
         newStatus = 'in_progress';
         currentCount = parseInt(externalOrder.start_count) + (parseInt(externalOrder.start_count) - parseInt(externalOrder.remains));
         break;
       case 'Canceled':
         newStatus = 'cancelled';
-        break;
-      case 'Partial':
-        newStatus = 'in_progress';
-        currentCount = parseInt(externalOrder.start_count) + (parseInt(externalOrder.start_count) - parseInt(externalOrder.remains));
         break;
     }
 
