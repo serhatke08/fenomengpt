@@ -1,6 +1,9 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
+import { useRouter } from 'next/navigation';
+import Link from 'next/link';
+import { useAuth } from '@/contexts/AuthContext';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { ChevronDown } from 'lucide-react';
@@ -190,9 +193,12 @@ const getServiceGroup = (type: string | undefined, category: string | undefined)
 };
 
 export default function ServicesPage() {
+  const { user } = useAuth();
+  const router = useRouter();
   const [services, setServices] = useState<Service[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [orderLoading, setOrderLoading] = useState(false);
   
   // Seçimler
   const [selectedPlatform, setSelectedPlatform] = useState<string>('');
@@ -480,6 +486,62 @@ export default function ServicesPage() {
     return (increasedRate * quantity) / 1000;
   }, [selectedService, quantity]);
 
+  // Sipariş verme fonksiyonu
+  const handleOrder = async () => {
+    // Kullanıcı giriş yapmamışsa login sayfasına yönlendir
+    if (!user) {
+      router.push('/login?redirect=/services');
+      return;
+    }
+
+    if (!selectedService || !link || quantity < parseInt(selectedService.min) || quantity > parseInt(selectedService.max)) {
+      alert('Lütfen tüm alanları doğru şekilde doldurun');
+      return;
+    }
+
+    try {
+      setOrderLoading(true);
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/orders`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify({
+          serviceId: selectedService.service.toString(),
+          link,
+          quantity,
+          price: parseFloat(selectedService.rate) * 1.52,
+          minQuantity: parseInt(selectedService.min),
+          maxQuantity: parseInt(selectedService.max),
+          apiProvider: 'turktakipcim'
+        })
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        alert('Sipariş başarıyla oluşturuldu!');
+        // Formu temizle
+        setSelectedService(null);
+        setLink('');
+        setQuantity(0);
+        setSelectedPlatform('');
+        setSelectedServiceGroup('');
+        setSelectedCategory('');
+        // Siparişler sayfasına yönlendir
+        router.push('/orders');
+      } else {
+        alert(data.message || 'Sipariş oluşturulurken hata oluştu');
+      }
+    } catch (err) {
+      console.error('Sipariş oluşturma hatası:', err);
+      alert('Sipariş oluşturulurken bir hata oluştu. Lütfen tekrar deneyin.');
+    } finally {
+      setOrderLoading(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen cyber-grid">
@@ -714,11 +776,31 @@ export default function ServicesPage() {
 
         {/* Sipariş Butonu */}
         {selectedService && link && quantity >= parseInt(selectedService.min) && quantity <= parseInt(selectedService.max) && (
-          <button 
-            className="w-full px-6 py-4 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-semibold rounded-lg transition-all duration-300 transform hover:scale-105 text-lg"
-          >
-            Sipariş Ver - {formatPrice(totalPrice)} TL
-          </button>
+          <>
+            <button 
+              onClick={handleOrder}
+              disabled={orderLoading}
+              className="w-full px-6 py-4 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-semibold rounded-lg transition-all duration-300 transform hover:scale-105 text-lg disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {orderLoading ? 'Sipariş Oluşturuluyor...' : `Sipariş Ver - ${formatPrice(totalPrice)} TL`}
+            </button>
+            {!user && (
+              <div className="mt-4 p-4 bg-yellow-900/20 border border-yellow-600/50 rounded-lg">
+                <p className="text-yellow-200 text-sm text-center">
+                  Sipariş vermek için <Link href="/login" className="text-yellow-400 hover:text-yellow-300 underline">giriş yapın</Link> veya <Link href="/register" className="text-yellow-400 hover:text-yellow-300 underline">kayıt olun</Link>
+                </p>
+              </div>
+            )}
+          </>
+        )}
+
+        {/* Giriş yapmamış kullanıcılar için bilgilendirme */}
+        {!user && selectedService && link && quantity >= parseInt(selectedService.min) && quantity <= parseInt(selectedService.max) && (
+          <div className="mt-4 p-4 bg-yellow-900/20 border border-yellow-600/50 rounded-lg">
+            <p className="text-yellow-200 text-sm text-center">
+              Sipariş vermek için <Link href="/login" className="text-yellow-400 hover:text-yellow-300 underline">giriş yapın</Link> veya <Link href="/register" className="text-yellow-400 hover:text-yellow-300 underline">kayıt olun</Link>
+            </p>
+          </div>
         )}
       </div>
       <Footer />
