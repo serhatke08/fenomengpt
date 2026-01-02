@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import Navbar from '@/components/Navbar';
+import Footer from '@/components/Footer';
 import { ChevronDown } from 'lucide-react';
 import Image from 'next/image';
 
@@ -87,33 +88,41 @@ const PlatformIcon = ({ platform }: { platform: string }) => {
   );
 };
 
-// Fiyat formatlama: tam sayı ise ondalık yok, değilse max 2 ondalık
+// Fiyat formatlama: kuruşları kaldır, sadece tam sayı göster
 const formatPrice = (price: number): string => {
-  if (price % 1 === 0) {
-    return price.toString();
-  }
-  return price.toFixed(2);
+  return Math.round(price).toString();
 };
 
 // Platform belirleme
 const getPlatformFromCategory = (category: string | undefined): string => {
   if (!category) return 'instagram';
-  const categoryLower = category.toLowerCase();
-  if (categoryLower.includes('instagram') || categoryLower.includes('ig')) {
+  // Türkçe karakterleri normalize et
+  const normalized = category.toLowerCase()
+    .replace(/ı/g, 'i')
+    .replace(/ğ/g, 'g')
+    .replace(/ü/g, 'u')
+    .replace(/ş/g, 's')
+    .replace(/ö/g, 'o')
+    .replace(/ç/g, 'c');
+  
+  // "x" önce kontrol edilmeli çünkü "twitter" kontrolü "x"i de yakalayabilir
+  if (normalized === 'x') {
+    return 'x';
+  } else if (normalized.includes('instagram') || normalized.includes('insta') || normalized.includes('ig')) {
     return 'instagram';
-  } else if (categoryLower.includes('tiktok') || categoryLower.includes('tt')) {
+  } else if (normalized.includes('tiktok') || normalized.includes('tt')) {
     return 'tiktok';
-  } else if (categoryLower.includes('youtube') || categoryLower.includes('yt')) {
+  } else if (normalized.includes('youtube') || normalized.includes('yt')) {
     return 'youtube';
-  } else if (categoryLower.includes('twitter') || categoryLower.includes('tw') || categoryLower.includes('x')) {
+  } else if (normalized.includes('twitter') || normalized.includes('tw')) {
     return 'twitter';
-  } else if (categoryLower.includes('facebook') || categoryLower.includes('fb')) {
+  } else if (normalized.includes('facebook') || normalized.includes('fb')) {
     return 'facebook';
-  } else if (categoryLower.includes('telegram')) {
+  } else if (normalized.includes('telegram')) {
     return 'telegram';
-  } else if (categoryLower.includes('spotify')) {
+  } else if (normalized.includes('spotify')) {
     return 'spotify';
-  } else if (categoryLower.includes('twitch')) {
+  } else if (normalized.includes('twitch')) {
     return 'twitch';
   }
   return 'instagram';
@@ -125,27 +134,56 @@ const getServiceGroup = (type: string | undefined, category: string | undefined)
   const typeLower = (type || '').toLowerCase();
   const categoryLower = (category || '').toLowerCase();
   
-  if (typeLower.includes('follower') || categoryLower.includes('follower')) {
+  // Türkçe karakterleri normalize et
+  const normalizedType = typeLower
+    .replace(/ı/g, 'i')
+    .replace(/ğ/g, 'g')
+    .replace(/ü/g, 'u')
+    .replace(/ş/g, 's')
+    .replace(/ö/g, 'o')
+    .replace(/ç/g, 'c');
+  const normalizedCategory = categoryLower
+    .replace(/ı/g, 'i')
+    .replace(/ğ/g, 'g')
+    .replace(/ü/g, 'u')
+    .replace(/ş/g, 's')
+    .replace(/ö/g, 'o')
+    .replace(/ç/g, 'c');
+  
+  if (normalizedType.includes('follower') || normalizedType.includes('takipci') || 
+      normalizedCategory.includes('follower') || normalizedCategory.includes('takipci')) {
     return 'followers';
-  } else if (typeLower.includes('like') || categoryLower.includes('like')) {
+  } else if (normalizedType.includes('like') || normalizedType.includes('begeni') ||
+             normalizedCategory.includes('like') || normalizedCategory.includes('begeni')) {
     return 'likes';
-  } else if (typeLower.includes('view') || categoryLower.includes('view')) {
+  } else if (normalizedType.includes('view') || normalizedType.includes('izlenme') ||
+             normalizedCategory.includes('view') || normalizedCategory.includes('izlenme')) {
     return 'views';
-  } else if (typeLower.includes('comment') || categoryLower.includes('comment')) {
+  } else if (normalizedType.includes('comment') || normalizedType.includes('yorum') ||
+             normalizedCategory.includes('comment') || normalizedCategory.includes('yorum')) {
     return 'comments';
-  } else if (typeLower.includes('share') || categoryLower.includes('share')) {
+  } else if (normalizedType.includes('share') || normalizedType.includes('paylasim') ||
+             normalizedCategory.includes('share') || normalizedCategory.includes('paylasim')) {
     return 'shares';
-  } else if (typeLower.includes('subscriber') || categoryLower.includes('subscriber')) {
+  } else if (normalizedType.includes('subscriber') || normalizedType.includes('abone') ||
+             normalizedCategory.includes('subscriber') || normalizedCategory.includes('abone')) {
     return 'subscribers';
-  } else if (typeLower.includes('reaction') || categoryLower.includes('reaction')) {
+  } else if (normalizedType.includes('reaction') || normalizedType.includes('reaksiyon') ||
+             normalizedCategory.includes('reaction') || normalizedCategory.includes('reaksiyon')) {
     return 'reactions';
-  } else if (typeLower.includes('member') || categoryLower.includes('member')) {
+  } else if (normalizedType.includes('member') || normalizedType.includes('uye') ||
+             normalizedCategory.includes('member') || normalizedCategory.includes('uye')) {
     return 'members';
-  } else if (typeLower.includes('play') || categoryLower.includes('play')) {
+  } else if (normalizedType.includes('play') || normalizedType.includes('calma') ||
+             normalizedCategory.includes('play') || normalizedCategory.includes('calma')) {
     return 'plays';
-  } else if (typeLower.includes('stream') || categoryLower.includes('stream')) {
+  } else if (normalizedType.includes('stream') || normalizedType.includes('yayin') ||
+             normalizedCategory.includes('stream') || normalizedCategory.includes('yayin')) {
     return 'streams';
-  } else if (typeLower.includes('vote') || typeLower.includes('poll')) {
+  } else if (normalizedType.includes('vote') || normalizedType.includes('oy') ||
+             normalizedType.includes('poll') || normalizedType.includes('anket') ||
+             normalizedCategory.includes('vote') || normalizedCategory.includes('oy') ||
+             normalizedCategory.includes('poll') || normalizedCategory.includes('anket')) {
     return 'votes';
   }
   return 'other';
@@ -171,15 +209,63 @@ export default function ServicesPage() {
   const fetchServices = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/services`);
-      if (!response.ok) {
-        throw new Error('Servisler yüklenemedi');
-      }
+      setError(null);
+      
+      const apiUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/services`;
+      console.log('Fetching services from:', apiUrl);
+      
+      const response = await fetch(apiUrl, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      
       const data = await response.json();
-      setServices(data.data || []);
+      
+      if (!response.ok) {
+        // Backend'den gelen hata mesajını göster
+        const errorMessage = data.message || data.error || `HTTP ${response.status}: Servisler yüklenemedi`;
+        const hint = data.hint ? `\n\n${data.hint}` : '';
+        throw new Error(errorMessage + hint);
+      }
+      
+      // Başarılı response kontrolü
+      if (!data.success) {
+        const errorMessage = data.message || data.error || 'Servisler yüklenemedi';
+        const hint = data.hint ? `\n\n${data.hint}` : '';
+        throw new Error(errorMessage + hint);
+      }
+      
+      const servicesList = data.data || [];
+      console.log(`Loaded ${servicesList.length} services from API`);
+      console.log('Services data:', servicesList);
+      
+      // API key yoksa bilgilendirici mesaj göster ama hata olarak değil
+      if (servicesList.length === 0 && data.message && data.message.includes('API key')) {
+        setError(null); // Hata mesajını temizle
+        // Sadece console'da logla, kullanıcıya gösterme
+        console.info('API key not configured:', data.message);
+      }
+      
+      // Platform dağılımını logla
+      const platformCounts: { [key: string]: number } = {};
+      servicesList.forEach((service: Service) => {
+        const platform = getPlatformFromCategory(service.category);
+        platformCounts[platform] = (platformCounts[platform] || 0) + 1;
+      });
+      console.log('Platform distribution:', platformCounts);
+      
+      setServices(servicesList);
     } catch (err) {
       console.error('Servisler yükleme hatası:', err);
-      setError(err instanceof Error ? err.message : 'Servisler yüklenirken bir hata oluştu');
+      const errorMessage = err instanceof Error ? err.message : 'Servisler yüklenirken bir hata oluştu';
+      setError(errorMessage);
+      
+      // Backend bağlantı hatası ise daha açıklayıcı mesaj
+      if (errorMessage.includes('Failed to fetch') || errorMessage.includes('NetworkError')) {
+        setError('Backend sunucusuna bağlanılamıyor. Lütfen backend\'in çalıştığından emin olun.');
+      }
     } finally {
       setLoading(false);
     }
@@ -288,23 +374,27 @@ export default function ServicesPage() {
     });
   }, [services, selectedPlatform]);
 
-  // Seçilen platforma göre Service Group listesi
+  // Seçilen platforma göre Service Group listesi (other hariç)
   const platformServiceGroups = useMemo(() => {
     if (!selectedPlatform) return [];
     const groupSet = new Set<string>();
     platformServices.forEach(service => {
       const group = getServiceGroup(service.type, service.category);
-      groupSet.add(group);
+      // "other" grubunu filtrele
+      if (group !== 'other') {
+        groupSet.add(group);
+      }
     });
     return Array.from(groupSet).sort();
   }, [platformServices, selectedPlatform]);
 
-  // Seçilen platform ve service group'a göre servisler
+  // Seçilen platform ve service group'a göre servisler (other hariç)
   const groupServices = useMemo(() => {
     if (!selectedPlatform || !selectedServiceGroup) return [];
     return platformServices.filter(service => {
       const group = getServiceGroup(service.type, service.category);
-      return group === selectedServiceGroup;
+      // "other" grubundaki servisleri filtrele
+      return group === selectedServiceGroup && group !== 'other';
     });
   }, [platformServices, selectedServiceGroup, selectedPlatform]);
 
@@ -381,18 +471,20 @@ export default function ServicesPage() {
     }
   };
 
-  // Toplam fiyat hesaplama
+  // Toplam fiyat hesaplama (rate 1000 birim için, %52 zam uygulanıyor)
   const totalPrice = useMemo(() => {
     if (!selectedService || !quantity) return 0;
     const rate = parseFloat(selectedService.rate);
-    return (rate * quantity) / 1000;
+    // Rate 1000 birim için, %52 zam uygulanıyor (1.52 ile çarpılıyor)
+    const increasedRate = rate * 1.52;
+    return (increasedRate * quantity) / 1000;
   }, [selectedService, quantity]);
 
   if (loading) {
     return (
       <div className="min-h-screen cyber-grid">
         <Navbar />
-        <div className="container mx-auto px-4 py-8">
+        <div className="container mx-auto px-4 py-8 pb-16">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-500 mx-auto"></div>
             <p className="text-purple-200 mt-4">Servisler yükleniyor...</p>
@@ -406,12 +498,13 @@ export default function ServicesPage() {
     return (
       <div className="min-h-screen cyber-grid">
         <Navbar />
-        <div className="container mx-auto px-4 py-8">
-          <div className="text-center">
-            <p className="text-red-400 text-lg">{error}</p>
+        <div className="container mx-auto px-4 py-8 pb-16 max-w-4xl">
+          <div className="bg-red-900/50 backdrop-blur-sm border border-red-700 rounded-xl p-6">
+            <h2 className="text-red-400 text-xl font-bold mb-4">⚠️ Hata</h2>
+            <div className="text-red-200 whitespace-pre-line mb-4">{error}</div>
             <button 
               onClick={fetchServices}
-              className="mt-4 px-6 py-2 bg-purple-600 hover:bg-purple-700 rounded-lg transition-colors"
+              className="px-6 py-2 bg-purple-600 hover:bg-purple-700 rounded-lg transition-colors text-white font-semibold"
             >
               Tekrar Dene
             </button>
@@ -425,7 +518,7 @@ export default function ServicesPage() {
     <div className="min-h-screen cyber-grid">
       <Navbar />
       
-      <div className="container mx-auto px-4 py-8 max-w-4xl">
+      <div className="container mx-auto px-4 py-8 pb-96 max-w-4xl">
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold gradient-text mb-4 neon-text">
             Servisler
@@ -519,7 +612,7 @@ export default function ServicesPage() {
               </label>
               {selectedService && (
                 <span className="text-green-400 font-bold text-lg">
-                  ${formatPrice(parseFloat(selectedService.rate))}
+                  {formatPrice(parseFloat(selectedService.rate) * 1.52)} TL / 1000 birim
                 </span>
               )}
             </div>
@@ -532,7 +625,7 @@ export default function ServicesPage() {
                 <option value="">Service Seçin</option>
                 {categoryServices.map(service => (
                   <option key={service.service} value={service.service.toString()}>
-                    {service.service} - {translateServiceName(service.name)} - ${formatPrice(parseFloat(service.rate))}
+                    {service.service} - {translateServiceName(service.name)} - {formatPrice(parseFloat(service.rate) * 1.52)} TL / 1000 birim
                   </option>
                 ))}
               </select>
@@ -613,7 +706,7 @@ export default function ServicesPage() {
               </div>
               <div>
                 <span className="text-gray-400 text-sm block mb-1">Charge</span>
-                <p className="text-green-400 font-bold text-2xl">${formatPrice(totalPrice)}</p>
+                <p className="text-green-400 font-bold text-2xl">{formatPrice(totalPrice)} TL</p>
               </div>
             </div>
           </div>
@@ -624,10 +717,11 @@ export default function ServicesPage() {
           <button 
             className="w-full px-6 py-4 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-semibold rounded-lg transition-all duration-300 transform hover:scale-105 text-lg"
           >
-            Sipariş Ver - ${formatPrice(totalPrice)}
+            Sipariş Ver - {formatPrice(totalPrice)} TL
           </button>
         )}
       </div>
+      <Footer />
     </div>
   );
 }

@@ -6,6 +6,7 @@ import { Card, CardContent } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Instagram, Music, Users, Heart, Eye, MessageCircle, Share2, Clock, CheckCircle, XCircle, AlertCircle, RefreshCw } from 'lucide-react';
 import Navbar from '@/components/Navbar';
+import Footer from '@/components/Footer';
 import Link from 'next/link';
 
 interface Order {
@@ -105,9 +106,11 @@ export default function OrdersPage() {
       const data = await response.json();
       
       if (data.success) {
-        setOrders(data.data);
+        // data.data'nın array olduğundan emin ol
+        setOrders(Array.isArray(data.data) ? data.data : []);
       } else {
         setError('Siparişler yüklenirken hata oluştu');
+        setOrders([]); // Hata durumunda boş array
       }
     } catch (err) {
       console.error('Siparişler yükleme hatası:', err);
@@ -142,9 +145,9 @@ export default function OrdersPage() {
     }
   };
 
-  const filteredOrders = orders.filter(order => 
+  const filteredOrders = Array.isArray(orders) ? orders.filter(order => 
     statusFilter === 'all' || order.status === statusFilter
-  );
+  ) : [];
 
   const getProgressPercentage = (order: Order) => {
     if (!order.startCount || !order.currentCount) return 0;
@@ -156,7 +159,7 @@ export default function OrdersPage() {
     return (
       <div className="min-h-screen cyber-grid">
         <Navbar />
-        <div className="container mx-auto px-4 py-8">
+        <div className="container mx-auto px-4 py-8 pb-16">
           <Card className="card-dark glow-effect">
             <CardContent className="p-8 text-center">
               <h2 className="text-2xl font-bold gradient-text mb-4">
@@ -188,7 +191,7 @@ export default function OrdersPage() {
     return (
       <div className="min-h-screen cyber-grid">
         <Navbar />
-        <div className="container mx-auto px-4 py-8">
+        <div className="container mx-auto px-4 py-8 pb-16">
           <div className="flex items-center justify-center h-64">
             <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-purple-500 glow-effect"></div>
           </div>
@@ -201,7 +204,7 @@ export default function OrdersPage() {
     <div className="min-h-screen cyber-grid">
       <Navbar />
       
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 py-8 pb-16">
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-4xl font-bold gradient-text mb-2 neon-text">
@@ -412,6 +415,7 @@ export default function OrdersPage() {
           </div>
         )}
       </div>
+      <Footer />
     </div>
   );
 }

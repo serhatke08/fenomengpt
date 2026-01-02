@@ -16,7 +16,6 @@ Modern bir sosyal medya servisleri paneli. Next.js 15 ve Express.js ile gelişti
 - Express.js
 - TypeScript
 - Supabase (PostgreSQL)
-- Followiz API Integration
 
 ## 📁 Proje Yapısı
 
@@ -74,7 +73,6 @@ npm run dev
 SUPABASE_URL=
 SUPABASE_ANON_KEY=
 SUPABASE_SERVICE_ROLE_KEY=
-FOLLOWIZ_API_KEY=
 JWT_SECRET=
 PORT=5000
 ```

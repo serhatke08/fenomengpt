@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Label } from '@/components/ui/Label';
 import Navbar from '@/components/Navbar';
+import Footer from '@/components/Footer';
 import Link from 'next/link';
 
 export default function RegisterPage() {
@@ -51,7 +52,7 @@ export default function RegisterPage() {
   return (
     <div className="min-h-screen cyber-grid">
       <Navbar />
-      <div className="flex items-center justify-center p-4 min-h-[calc(100vh-4rem)]">
+      <div className="flex items-center justify-center p-4 pb-16 min-h-[calc(100vh-4rem)]">
       <Card className="w-full max-w-md card-dark glow-effect">
         <CardHeader className="text-center">
           <CardTitle className="text-3xl gradient-text neon-text">Register</CardTitle>
@@ -135,6 +136,7 @@ export default function RegisterPage() {
         </CardContent>
       </Card>
       </div>
+      <Footer />
     </div>
   );
 }

@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/Button';
 import { ArrowRight, Zap, Shield, Clock } from 'lucide-react';
 import Navbar from '@/components/Navbar';
+import Footer from '@/components/Footer';
 
 export default function HomePage() {
 
@@ -92,7 +93,7 @@ export default function HomePage() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-16 bg-gradient-to-r from-purple-900/20 to-pink-900/20">
+      <section className="py-16 pb-24 bg-gradient-to-r from-purple-900/20 to-pink-900/20">
         <div className="container mx-auto px-4 text-center">
           <h2 className="text-4xl font-bold gradient-text mb-4">
             Hemen Başlayın!
@@ -115,6 +116,7 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+      <Footer />
     </div>
   );
 }
